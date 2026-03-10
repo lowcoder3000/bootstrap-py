@@ -10,7 +10,6 @@ This module is intended to simplify development workflows, streamline onboarding
 - Automatically creates and activates a venv/ directory if not present
 - Installs Python packages from requirements.txt (only when changes are detected)
 - Loads environment variables from a .env file
-- Supports sourcing additional configuration from config.sh (Unix) or config.bat (Windows)
 - Relaunches the original script within the virtual environment context
 - Fully cross-platform: Windows, macOS, Linux
 - Requires no external packages or dependencies
@@ -28,8 +27,7 @@ my_project/
 ├── example.py             # Example script using bootstrap
 ├── requirements.txt       # Optional dependency list
 ├── .env                   # Optional environment variables
-├── config.sh              # Optional shell configuration (Unix)
-├── config.bat             # Optional shell configuration (Windows)
+
 └── venv/                  # Created automatically
 ```
 
@@ -69,9 +67,7 @@ DEBUG=true
 ```
 You probably want to add this file to your `.gitignore`.
 
-5. (Optional) Add a `config.sh` or `config.bat` script
 
-Script to modify shell configurations, such as modifying PATH or setting additional environment variables before the script launches.
 
 ## Behavior Overview
 
@@ -81,8 +77,7 @@ When a script is run, the bootstrapper performs the following:
 2. If not:
    - Creates the virtual environment in the `venv/` folder using the system Python interpreter.
    - Installs or reinstalls packages listed in `requirements.txt` only if the file has changed (tracked using a hash stored in the venv folder).
-   - Loads environment variables from `.env`.
-   - Sources `config.sh` or `config.bat` if present.
+    - Loads environment variables from `.env`.
    - Relaunches the same script inside the new environment.
 3. If already inside a virtual environment:
    - Loads `.env` directly and proceeds with execution.

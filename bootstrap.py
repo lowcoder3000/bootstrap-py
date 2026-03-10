@@ -20,7 +20,7 @@ def in_venv():
 def get_paths():
     base_dir = os.path.abspath(os.path.dirname(__file__))
     venv_dir = os.path.join(base_dir, "venv")
-    config_file = os.path.join(base_dir, "config.sh")
+
     env_file = os.path.join(base_dir, ".env")
     requirements = os.path.join(base_dir, "requirements.txt")
     req_hash_path = os.path.join(venv_dir, ".requirements.hash")
@@ -30,7 +30,7 @@ def get_paths():
     else:
         python_bin = os.path.join(venv_dir, "bin", "python")
 
-    return base_dir, venv_dir, python_bin, config_file, env_file, requirements, req_hash_path
+    return base_dir, venv_dir, python_bin, env_file, requirements, req_hash_path
 
 def hash_file(path):
     h = hashlib.sha256()
@@ -81,32 +81,24 @@ def load_dotenv(env_file):
                     os.environ.setdefault(key, val)
 
 def relaunch(script_path, script_args):
-    _, venv_dir, venv_python, config_file, env_file, requirements, req_hash_path = get_paths()
+    _, venv_dir, venv_python, env_file, requirements, req_hash_path = get_paths()
 
     create_venv_if_needed(venv_dir)
     install_requirements_if_needed(venv_python, requirements, req_hash_path)
     load_dotenv(env_file)
 
     args = ' '.join(f'"{a}"' for a in [script_path] + script_args)
-
     try:
+        cmd = f'{venv_python} {args}'
+        if DEBUG:
+            print(color(f"DEBUG: {cmd}", "33"))
         if os.name == "nt":
-            config_bat = config_file.replace('.sh', '.bat')
-            if os.path.exists(config_bat):
-                cmd = f'cmd /c "{config_bat} && {venv_python} {args}"'
-            else:
-                cmd = f'{venv_python} {args}'
-            if DEBUG:
-                print(color(f"DEBUG: {cmd}", "33"))
             subprocess.run(cmd, shell=True)
         else:
-            if os.path.exists(config_file):
-                cmd = f'. "{config_file}" && "{venv_python}" {args}'
-            else:
-                cmd = f'"{venv_python}" {args}'
-            if DEBUG:
-                print(color(f"DEBUG: {cmd}", "33"))
             subprocess.run(cmd, shell=True, executable="/bin/bash")
+    except KeyboardInterrupt:
+        print(color("\n✋ Interrupted.", "31"))
+        sys.exit(130)
     except KeyboardInterrupt:
         print(color("\n👋 Interrupted.", "31"))
         sys.exit(130)
